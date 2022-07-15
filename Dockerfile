@@ -21,4 +21,10 @@ COPY --from=builder fees/cmd/feesService feesService
 EXPOSE 8081
 EXPOSE 8080
 
+ENV HOST=database
+ENV PORT=5432
+ENV USER=test
+ENV PASSWORD=test
+ENV DBNAME=eth
+
 CMD ["/feesService", "--port", "8081", "--gateway_port", "8080"]

@@ -11,3 +11,7 @@ protogen:
 run:
 	docker-compose build
 	docker-compose up
+
+mock:
+	mockgen -destination pkg/fees/usecases/mocks/ethRepositoryMock.go \
+		github.com/rsmarincu/glassnode/pkg/fees/usecases ETHRepository

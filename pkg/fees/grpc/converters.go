@@ -9,7 +9,7 @@ import (
 func ToExternalFee(internalFee *fees.Fee) *feespb.Fee {
 	return &feespb.Fee{
 		T: timestamppb.New(internalFee.Timestamp),
-		V: internalFee.Value,
+		V: float32(internalFee.Value),
 	}
 }
 
