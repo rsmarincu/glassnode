@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "github.com/rsmarincu/glassnode/fees";
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+service Fees {
+  rpc ListFees(ListFeesRequest) returns (ListFeesResponse) {
+    option (google.api.http) = {
+      get: "/v1/fees"
+    };
+  };
+}
+
+message ListFeesRequest {
+
+}
+
+message ListFeesResponse {
+  repeated Fee fees = 1;
+}
+
+message Fee {
+  google.protobuf.Timestamp t = 1;
+  float v = 2;
+}

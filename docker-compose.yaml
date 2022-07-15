@@ -8,3 +8,13 @@ services:
       POSTGRES_PASSWORD: test
     ports:
       - "5432:5432"
+  fees:
+    container_name: fees
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - database
