@@ -24,10 +24,14 @@ func NewFeesService(repo ETHRepository) *FeesService {
 	}
 }
 
-func (f *FeesService) ListFees(ctx context.Context) ([]*fees.Fee, error) {
+func (f *FeesService) ListFees(ctx context.Context, offset uint32, limit uint32) ([]*fees.Fee, bool, error) {
 	transactions, err := f.ETHRepository.QueryEOATransactions(ctx)
 	if err != nil {
-		return nil, err
+		return nil, false, err
+	}
+
+	if len(transactions) == 0 {
+		return nil, false, nil
 	}
 
 	finalFees := []*fees.Fee{}
@@ -48,5 +52,14 @@ func (f *FeesService) ListFees(ctx context.Context) ([]*fees.Fee, error) {
 		}
 	}
 
-	return finalFees, nil
+	if offset > 0 {
+		finalFees = finalFees[offset:]
+	}
+
+	var moreResults bool
+	if moreResults = len(finalFees) > int(limit); moreResults {
+		finalFees = finalFees[:limit]
+	}
+
+	return finalFees, moreResults, nil
 }

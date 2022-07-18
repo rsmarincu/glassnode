@@ -15,3 +15,5 @@ run:
 mock:
 	mockgen -destination pkg/fees/usecases/mocks/ethRepositoryMock.go \
 		github.com/rsmarincu/glassnode/pkg/fees/usecases ETHRepository
+	mockgen -destination pkg/fees/grpc/mocks/feesServiceMock.go \
+    		github.com/rsmarincu/glassnode/pkg/fees/grpc FeesService

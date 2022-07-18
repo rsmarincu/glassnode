@@ -2,12 +2,16 @@ package grpc
 
 import (
 	"context"
+	"github.com/rsmarincu/glassnode/pkg/common"
+
 	feespb "github.com/rsmarincu/glassnode/api"
 	"github.com/rsmarincu/glassnode/pkg/fees"
 )
 
+const defaultPageSize = 10
+
 type FeesService interface {
-	ListFees(ctx context.Context) ([]*fees.Fee, error)
+	ListFees(ctx context.Context, offset uint32, limit uint32) ([]*fees.Fee, bool, error)
 }
 
 type ServiceHandler struct {
@@ -22,10 +26,29 @@ func NewServiceHandler(feesService FeesService) feespb.FeesServer {
 }
 
 func (s *ServiceHandler) ListFees(ctx context.Context, req *feespb.ListFeesRequest) (*feespb.ListFeesResponse, error) {
-	result, err := s.feesService.ListFees(ctx)
+	offset, err := common.DecodeToken(req.PageToken)
 	if err != nil {
 		return nil, err
 	}
 
-	return &feespb.ListFeesResponse{Fees: ToExternalFees(result)}, err
+	limit := req.PageSize
+	if limit == 0 {
+		limit = defaultPageSize
+	}
+
+	result, moreResults, err := s.feesService.ListFees(ctx, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	var pageToken string
+	if moreResults {
+		pageToken = common.EncodeToken(offset + limit)
+	}
+
+	return &feespb.ListFeesResponse{
+		Fees:              ToExternalFees(result),
+		PreviousPageToken: common.GetPreviousPageToken(offset, limit),
+		NextPageToken:     pageToken,
+	}, err
 }

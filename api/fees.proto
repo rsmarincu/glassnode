@@ -14,11 +14,14 @@ service Fees {
 }
 
 message ListFeesRequest {
-
+  uint32 page_size = 1;
+  string page_token = 2;
 }
 
 message ListFeesResponse {
   repeated Fee fees = 1;
+  string next_page_token = 2;
+  string previous_page_token = 3;
 }
 
 message Fee {

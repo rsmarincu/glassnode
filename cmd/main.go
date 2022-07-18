@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rsmarincu/glassnode/pkg/fees/repository"
 	"github.com/rsmarincu/glassnode/pkg/fees/usecases"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -28,6 +30,8 @@ type Opts struct {
 var opts Opts
 
 func main() {
+	log := logrus.New()
+
 	_, err := flags.ParseArgs(&opts, os.Args)
 	if err != nil {
 		log.Fatalf("failed to parse args: %w", err)
@@ -51,7 +55,11 @@ func main() {
 	}
 	defer db.Close()
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc_middleware.WithUnaryServerChain(
+			grpc_logrus.UnaryServerInterceptor(logrus.NewEntry(log))),
+	)
+
 	ethRepository := repository.NewETHRepository(db)
 	feesService := usecases.NewFeesService(ethRepository)
 	feespb.RegisterFeesServer(grpcServer, feesGrpc.NewServiceHandler(feesService))
