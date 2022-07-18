@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 	"github.com/rsmarincu/glassnode/pkg/common"
 
 	feespb "github.com/rsmarincu/glassnode/api"
@@ -38,7 +39,7 @@ func (s *ServiceHandler) ListFees(ctx context.Context, req *feespb.ListFeesReque
 
 	result, moreResults, err := s.feesService.ListFees(ctx, offset, limit)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("got error from fees service: %w", err)
 	}
 
 	var pageToken string

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 )
 
 type ETHRepository struct {
@@ -23,7 +24,7 @@ func (r *ETHRepository) QueryEOATransactions(ctx context.Context) ([]*Transactio
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("got error while querying database: %w", err)
 	}
 
 	defer rows.Close()
@@ -44,7 +45,7 @@ func (r *ETHRepository) QueryEOATransactions(ctx context.Context) ([]*Transactio
 			&transaction.Status,
 		)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("got error whitle scanning rows: %w", err)
 		}
 		result = append(result, &transaction)
 	}

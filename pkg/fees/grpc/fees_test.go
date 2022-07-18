@@ -60,6 +60,27 @@ func TestFees(t *testing.T) {
 		assert.Len(t, response.Fees, len(fees))
 	})
 
+	t.Run("successfully returns response with no fees", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		ctx := context.Background()
+
+		mockFeesService := mock_grpc.NewMockFeesService(ctrl)
+
+		handler := grpc.NewServiceHandler(mockFeesService)
+
+		req := feespb.ListFeesRequest{
+			PageSize:  0,
+			PageToken: "",
+		}
+		var offset, limit uint32 = 0, 10
+
+		mockFeesService.EXPECT().ListFees(gomock.Any(), offset, limit).Return(nil, false, nil)
+		response, err := handler.ListFees(ctx, &req)
+
+		require.NoError(t, err)
+		assert.Empty(t, response.Fees)
+	})
+
 	t.Run("propagates service error", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		ctx := context.Background()
@@ -107,7 +128,7 @@ func TestFees(t *testing.T) {
 
 		mockFeesService.EXPECT().ListFees(gomock.Any(), offset, limit).Return(fees, true, nil)
 		response, err := handler.ListFees(ctx, &req)
-		
+
 		require.NoError(t, err)
 		assert.NotEmpty(t, response.NextPageToken)
 		assert.Len(t, response.Fees, len(fees))
